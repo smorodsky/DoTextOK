@@ -1,0 +1,21 @@
+﻿var ProgressBar = function(title) { // ProgressBar
+     var w = new Window('palette', title, {x:0, y:0, width:700, height:90},{closeButton: false}),
+          pb = w.add('progressbar', {x:20, y:32, width:660, height:12}),
+          st = w.add('statictext', {x:20, y:12, width:660, height:20});
+          ms = w.add('statictext', {x:20, y:52, width:660, height:20});
+          st.justify = 'left';
+          w.center();
+     this.reset = function(msg,maxValue) {
+          st.text = msg;
+          pb.value = 0;
+          pb.maxvalue = maxValue;
+          pb.visible = maxValue;
+          w.show();
+      };
+     this.info = function(msg)  {
+          ms.text = msg;
+          w.show();
+     };
+     this.set = function(step) {pb.value = step};
+     this.close = function() {w.close();};
+} // ProgressBar

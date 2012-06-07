@@ -1,0 +1,274 @@
+﻿#include "FindChangeUsingGREP.incjsx"
+
+// Оформление текста
+function TypographicaProcessing(myText, properties, /* optional */ pBar) {
+	if (properties.fixOneLetterFromMenu != 2) { // fixOneLetterFromMenu != 2
+		pBar && pBar.set(++myCurrActionNumber);
+		
+		if (properties.fixOneLetterFromMenu == 1) {
+			myFindChangeUsingGREP(
+				myText,
+				"( )" + SpaceLetterNonbreackingSpace + "( )",
+				"$1" + "$2" + myNonbreakingSpace,
+				pBar,
+				" Запрет отрывать однобуквенные слова"
+			);
+			myFindChangeUsingGREP(
+				myText,
+				"( )" + NonbreackingSpaceLetterSpace + "( )",
+				myNonbreakingSpace + "$2" + "$3" ,
+				pBar,
+				" Запрет отрывать однобуквенные слова"
+			);
+			// повтор проверки, чтобы учесть вставленные только что неразрывные пробелы
+			myFindChangeUsingGREP(
+				myText,
+				"( )" + SpaceLetterNonbreackingSpace + "(" + myNonbreakingSpace + ")" + SpaceLetterNonbreackingSpace + "( )",
+				"$1" + "$2" + "$3" + "$4" + myNonbreakingSpace,
+				pBar,
+				" Запрет отрывать однобуквенные слова"
+			);   
+		}
+	} // fixOneLetterFromMenu != 2
+	if (properties.fixTwoLetterFromMenu != 2) { // fixTwoLetterFromMenu != 2
+		pBar && pBar.set(++myCurrActionNumber);
+		
+		if (properties.fixTwoLetterFromMenu == 1) {
+			myFindChangeUsingGREP(
+				myText,
+				"( " +"|" + myNonbreakingSpace +")" + SpaceTwoLetterNonbreackingSpace + "( )",
+				"$1" + "$2" + myNonbreakingSpace,
+				pBar,
+				" Запрет отрывать двухбуквенные слова"
+			);
+			myFindChangeUsingGREP(
+				myText,
+				"( )" + NonbreackingSpaceTwoLetterSpace + "( )",
+				myNonbreakingSpace + "$2" + "$3" ,
+				pBar,
+				" Запрет отрывать двухбуквенные слова"
+			);
+		}
+	} // fixTwoLetterFromMenu != 2
+	if (properties.bull2textFromMenu != 2) { // bull2textFromMenu != 2
+		pBar && pBar.set(++myCurrActionNumber);
+		
+		if (properties.bull2textFromMenu == 1) { 
+			pBar && pBar.info(" Преобразование буллитов и нумерации в текст"); 
+			myText.convertBulletsAndNumberingToText(); 
+		}
+	} // bull2textFromMenu != 2
+	if (properties.fixDigitAndWordFromMenu != 2) { // fixDigitAndWordFromMenu != 2
+		pBar && pBar.set(++myCurrActionNumber);
+		
+		if (properties.fixDigitAndWordFromMenu == 1) {
+			myFindChangeUsingGREP(
+				myText,
+				myUnits, 
+				"$1" + myNonbreakingSpace + "$3",
+				pBar,
+				" Неразрывный пробел между числом и единицей измерения"
+			);
+		}
+	} // fixDigitAndWordFromMenu != 2
+	if (properties.charStylesFromMenu != 2) { // charStylesFromMenu != 2
+		pBar && pBar.set(++myCurrActionNumber);
+		
+		if (properties.charStylesFromMenu == 1) { 
+			pBar && pBar.info(" Создание символьных стилей для курсива, полужирного, индексов"); 
+			myBoldItalicAndIndexSelection(); 
+		}
+	} // charStylesFromMenu != 2
+	if (properties.grekCharStylesFromMenu != 2) { // grekCharStylesFromMenu != 2
+		pBar && pBar.set(++myCurrActionNumber);
+		
+		if (properties.grekCharStylesFromMenu == 1) {
+			myGrekChar(myText);
+		}
+	} // grekCharStylesFromMenu != 2
+
+	if (properties.footnote1FromMenu != 2) { // footnote1FromMenu != 2
+		pBar && pBar.set(++myCurrActionNumber);
+		
+		if (properties.footnote1FromMenu == 1) {  //  footnote1FromMenu == 1  
+			pBar && pBar.info(" Приведение в порядок очерёдности знаков пунктуации и сносок"); 
+			FootnoteSignMustBe(myText, "BeforePoint");   // ищем случаи, когда сперва точка/запятая, потом знак сноски, и меняем их местами
+		}  //  footnote1FromMenu == 1
+		else { 
+			pBar && pBar.info(" Приведение в порядок очерёдности знаков пунктуации и сносок"); 
+			FootnoteSignMustBe(myText, "AfterPoint"); 
+		}    // ищем случаи, когда сперва знак сноски, потом  точка/запятая, и меняем их местами
+		myAddSpacesBeforeFootnoteSign(myText); // перед знаком сноски ставим волосяную шпацию
+	} // footnote1FromMenu != 2
+
+	pBar && pBar.info(" Запрет разрыва единиц измерения по дробной черте"); 
+	MakeSlashNoBreak(myText);   // ищем случаи ц/га, руб./долл. и пр. и присваиваем наклонной черте атрибут NoBreak
+
+	if (properties.oneStyleFromMenu == true) {
+		myText.paragraphs.itemByRange(0, -1).appliedParagraphStyle = 
+			myDocument.paragraphStyles[ParaIndexFromMenu];
+	}
+	if (properties.rusLangFromMenu == 1)  { // rusLangFromMenu == 1
+		var myTextObject = myText.texts.item(0);
+		
+		try {
+			myTextObject.appliedLanguage = "Russian"; 
+		}
+		catch (e) {
+			try {
+				myTextObject.appliedLanguage = "Русский"; 
+			}
+			catch (e) { 
+				alert("Не удалось присвоить тексту атрибут 'Русский язык'.");
+			} 
+		}
+	} // rusLangFromMenu == 1	
+}
+
+///////////////
+function myGrekChar(myText) { // myGrekChar
+	var myFSLength;   
+	app.findGrepPreferences = NothingEnum.nothing;
+	app.findChangeGrepOptions.includeFootnotes = true;
+	app.findGrepPreferences.findWhat = mySpecialChar;
+	
+	try {
+		myFoundSamples = myText.findGrep();
+		myFSLength = myFoundSamples.length;
+	}
+	catch (e) { 
+		myFSLength = 0; 
+	}
+	if (myFSLength != 0) { // myFoundSamples.length != 0
+		var characterStyle = myDocument.characterStyles.itemByName("mySpecialChars");
+		
+		// цикл по числу элементов коллекции. Движение снизу вверх
+		for (var j = myFoundSamples.length; j--; ) { // j=myFoundSamples.length-1	
+			var myLine = myFoundSamples[j];
+			myLine.characters[0].appliedCharacterStyle = characterStyle;
+		} // j=myFoundSamples.length-1
+	} // myFoundSamples.length != 0    
+	// ищем символы гарнитуры Symbol
+	app.findGrepPreferences = NothingEnum.nothing;
+	app.findChangeGrepOptions.includeFootnotes = true;
+	// здесь возможно исключение - указанный шрифт может отсутствовать
+	app.findGrepPreferences.appliedFont = fontSymbol;
+	app.findGrepPreferences.findWhat = "\.";
+	var myFoundSamples = myText.findGrep();
+	
+	if (myFoundSamples.length != 0) { // myFoundSamples.length != 0
+		
+		// цикл по числу элементов коллекции. Движение снизу вверх
+		for (var j=myFoundSamples.length-1; j >= 0; j--) { // j=myFoundSamples.length-1	
+			var myLine = myFoundSamples[j];
+			myLine.characters[0].appliedCharacterStyle = myCStyleSpecialChars;
+		} // j=myFoundSamples.length-1
+	} // myFoundSamples.length != 0    
+} // // myGrekChar
+
+///////////////
+function FootnoteSignMustBe(myText, Info) { //FootnoteSignMustBe
+	app.findTextPreferences = NothingEnum.nothing;
+	app.findChangeTextOptions.properties = {includeFootnotes: true};
+	app.findTextPreferences.findWhat = '^F';
+	var myFoundSamples = myText.findText();
+	var characterStyle = "myFootnotes";
+	
+	for (i = myFoundSamples.length - 1; i >= 0; i--) { // myFoundSamples.length - 1
+		myFoundSamples[i].appliedCharacterStyle = characterStyle;
+		
+		if (myFoundSamples[i].parent.constructor.name == "Footnote") {
+			continue;
+		}
+		var mySt = myFoundSamples[i].parentStory;
+		var myFootnoteChar = mySt.characters.item(myFoundSamples[i].insertionPoints[0].index);
+		var myNextChar = mySt.characters.item(myFootnoteChar.index + 1);    
+		var myNextCharContents = myNextChar.contents;
+		var myPrevChar = myFootnoteChar.parent.characters.item(myFootnoteChar.index - 1);    
+		var myPrevCharContents = myPrevChar.contents;
+		if (Info == "BeforePoint")  {  
+			if (myPrevCharContents == "." || myPrevCharContents == ",") {
+				myPrevChar.move(
+					LocationOptions.after, 
+					mySt.characters.item(myFoundSamples[i].insertionPoints[0].index)); 
+			}
+		} 
+		else  /* Info == "AfterPoint"  */ {  
+			if (myNextCharContents == "." || myNextCharContents == ",") {
+				myNextChar.move(
+					LocationOptions.before, 
+					mySt.characters.item(myFoundSamples[i].insertionPoints[0].index)); 
+			}
+		} 
+	} // myFoundSamples.length - 1
+} // FootnoteSignMustBe
+////
+function myAddSpacesBeforeFootnoteSign(myText) { // myAddSpacesBeforeFootnoteSign
+	app.findTextPreferences = NothingEnum.nothing;
+	app.findTextPreferences.findWhat='^?^F'; // ищем знак сноски и символ перед ним
+	var myFoundSamples = myText.findText();
+	
+	for (var i = myFoundSamples.length; i--; ) { // myFoundSamples.length - 1
+		var myFound = myFoundSamples[i];
+		var myFrstChar = myFound.characters[0].contents;
+		
+		if (myFrstChar != "." && myFrstChar != ",") {
+			// вставляем волосяную шпацию перед знаком сноски
+			myFound.insertionPoints[-2].contents = "\u2009";
+		}
+	} // myFoundSamples.length - 1
+} // myAddSpacesBeforeFootnoteSign
+
+////////////
+function MakeSlashNoBreak(myText) { // MakeSlashNoBreak()
+	var mySlashIndex;
+	app.findGrepPreferences = NothingEnum.nothing;
+	app.findChangeGrepOptions.includeFootnotes = true;
+	app.findGrepPreferences.findWhat = "(\\s)([\\l\\u]+?\\.{0,1})(/)([\\l\\u]+?\\.{0,1})(\\s)";
+	var myFoundSamples = myText.findGrep();
+	
+	for (var i = myFoundSamples.length; i--; ) { // myFoundSamples.length - 1
+		
+		try { 
+			mySlashIndex = myFoundSamples[i].contents.search("/");
+		} catch (e) { 
+			continue; 
+		}
+		myFoundSamples[i].characters[mySlashIndex].noBreak = true;
+	} // myFoundSamples.length - 1
+} // MakeSlashNoBreak()    
+
+//////////////////////
+function myBoldItalicAndIndexSelection(myText) {  // myBoldItalicAndIndexSelection
+	// выделение цветом текста в нижном и верхнем регистре (каждое начертание будет иметь свой символьный стиль)
+	// Заменяем верхний индекс форматирования символов на символьный стиль "Superscript" 
+	findAndApplyCharacterStyle(myText, {position: Position.SUPERSCRIPT}, "mySupChars");
+	// Заменяем верхний индекс форматирования символов на символьный стиль "Subrscript" 
+	findAndApplyCharacterStyle(myText, {position: Position.SUBSCRIPT}, "mySubChars");
+	// Замена стиля текста со специальными начертаниями
+	findAndApplyCharacterStyle(myText, {fontStyle: "Bold"}, "myBoldChars");
+	findAndApplyCharacterStyle(myText, {fontStyle: "Italic"}, "myItalicChars");
+	findAndApplyCharacterStyle(myText, {fontStyle: "Bold Italic"}, "myBoldItalicChars");
+} // myBoldItalicAndIndexSelection
+
+// ищет символы по признакам, перечисленным в findTextPreferences
+// и применяет указанный символьный стиль
+function findAndApplyCharacterStyle(myText, findTextPreferences, characterStyleName) {
+	// сброс всех параметров поиска
+	app.findTextPreferences = NothingEnum.nothing;
+	
+	// перенесем указанные параметры поиска
+	for (var i in findTextPreferences) {
+		app.findTextPreferences[i] = findTextPreferences[i];
+	}
+	var myFound = myText.findText(); //собрана коллекция искомых элементов в статье.
+	
+	// выход если ничего не найдено
+	if (0 == myFound.length) return;
+	
+	// цикл по числу элементов коллекции. Движение снизу вверх
+	for (var i = myFound.length; i--; ) {
+		myFound[i].appliedCharacterStyle = characterStyleName;
+	} 
+}
+

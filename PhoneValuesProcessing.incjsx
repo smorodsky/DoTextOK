@@ -1,0 +1,71 @@
+﻿#include "FindChangeUsingGREP.incjsx"
+
+// номера телефонов
+function PhoneValuesProcessing(myText, properties, /* optional */ pBar) {
+	var mySearchSep;
+	
+	if (properties.SearchedDefisFromMenu == 1) {
+		mySearchSep = "(-)";
+	}
+	else if (properties.SearchedMinusFromMenu == 1) {
+		mySearchSep = "(–)";
+	}
+	else if (properties.SearchedTireFromMenu == 1) {
+		mySearchSep = "(—)";
+	}
+	else { 
+		alert ("Разделитель групп цифр в обрабатываемых телефонных \
+номерах не определен, поэтому в качестве разделителя будет дефис."); 
+		mySearchSep = "(-)"; 
+	} 
+	//
+	var myNmrSep;
+	
+	if (properties.SepIsSpaceFromMenu == 1) {
+		myNmrSep = myNonbreakingSpaceFixedWidth;
+	}
+	else if (properties.SepIsDefisFromMenu == 1) {
+		myNmrSep = myNonbreakingHyphen;
+	}
+	else if (properties.SepIsMinusFromMenu == 1) {
+		myNmrSep = "–";
+	}
+	else if (properties.SepIsDotFromMenu == 1) {
+		myNmrSep = ".";
+	}
+	else { 
+		alert ("Разделитель групп цифр в обработанных телефонных номерах \
+не определен, поэтому в качестве разделителя будет дефис."); 
+		myNmrSep = myNonbreakingHyphen; 
+	}
+	if (properties.sevendigitsFromMenu == 1) { // sevendigitsFromMenu == 1
+		
+		if (properties.mySet34FromMenu == 1) { // mySet34FromMenu == 1
+			myFindChangeUsingGREP(
+				myText,
+				"(\\d\\d\\d)" + mySearchSep + "(\\d\\d\\d\\d)",
+				"$1" + myNmrSep + "$3",
+				pBar,
+				" Обработка телефонных номеров формата XXX-XXXX"
+			);
+		} // mySet34FromMenu == 1
+		if (properties.mySet322FromMenu == 1) { // mySet322FromMenu == 1
+			myFindChangeUsingGREP(
+				myText,
+				"(\\d\\d\\d)"+ mySearchSep + "(\\d\\d)"+ mySearchSep + "(d\\d)",
+				"$1" + myNmrSep + "$3" + myNmrSep + "$5",
+				pBar,
+				" Обработка телефонных номеров формата XXX-XX-XX"
+			);
+		} // mySet34FromMenu == 1    
+	} // sevendigitsFromMenu == 1
+	if (properties.sixdigitsFromMenu == 1) { // sixdigitsFromMenu == 1
+		myFindChangeUsingGREP(
+			myText,
+			"(\\d\\d)" + mySearchSep + "(\\d\\d)"+ mySearchSep + "(\\d\\d)",
+			"$1" + myNmrSep + "$3" + myNmrSep + "$5",
+			pBar,
+			" Обработка телефонных номеров формата XX-XX-XX"
+		);
+	} // sixdigitsFromMenu == 1
+}

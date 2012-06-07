@@ -1,0 +1,68 @@
+﻿///////////////
+function RemoveHyperLinks(myText) { // myRemoveHyperLinks
+	var myRez = 0;
+	
+	// global variable is not defined
+	if (typeof myProgramTitul == 'undefined') myProgramTitul = '';
+	
+	// detect document
+	var myDocument = getDocumentByStory(myText);
+	
+	// статей в документе может быть несколько, поэтому узнаем индекс обрабатываемой, myText
+	var myStoryIndex = -1;
+	
+	for (var i = 0, l = myDocument.stories.length; i < l; i++) { // myDocument.stories.length
+		
+		if (myDocument.stories[i] == myText) { 
+			myStoryIndex = i; 
+			break; 
+		}
+	} // myDocument.stories.length
+	if (myStoryIndex == -1) { // myStoryIndex == -1
+		alert("Не удалось определить индекс статьи. Удаление гиперссылок прекращено. [1]", myProgramTitul);
+		return;
+	} // myStoryIndex == -1
+	if (myDocument.hyperlinks.length > 0) { // if
+		var myHypStoryIndex = -1;
+		var myHypStory;
+		var myHypLink;
+		var myDocHypLength = myDocument.hyperlinks.length;
+		
+		for (var j = myDocHypLength - 1; j >= 0 ; j--) { // for   
+			myHypLink = myDocument.hyperlinks[j]; 
+			myHypStory = myHypLink.source.sourceText.parentStory;
+
+			for (var i = 0, l = myDocument.stories.length; i < l; i++) { // myDocument.stories.length
+				
+				if (myDocument.stories[i] == myHypStory) { 
+					myHypStoryIndex = i; 
+					break; 
+				}
+			} // myDocument.stories.length
+			if (myHypStoryIndex == -1) { // myHypStoryIndex == -1
+				alert("Не удалось определить индекс статьи. Удаление гиперссылок прекращено. [2]", myProgramTitul);
+				return;
+			} // myHypStoryIndex == -1
+			if (myStoryIndex != myHypStoryIndex) continue; // найденная гиперссылка не принадлежит этой статье
+			myDocument.hyperlinks[j].remove();
+			myRez++;		  
+		} // for
+	}  // if
+	//alert (myRez);
+	return myRez;	
+} //myRemoveHyperLinks
+
+function getDocumentByStory(story) {
+	var obj = story;
+	
+	do {
+		obj = obj.parent;
+		var constructorName = obj.constructor.name;
+		
+		if ('Application' == constructorName) {
+			throw new Error('Can not find Document');
+		}
+	} while (constructorName != 'Document');
+
+	return obj;
+}

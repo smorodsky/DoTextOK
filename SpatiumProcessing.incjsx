@@ -1,0 +1,120 @@
+﻿#include "FindChangeUsingGREP.incjsx"
+
+// Шпации в тексте
+function SpatiumProcessing(myText, properties, /* optional */ pBar) {
+	if (properties.tireAndSpatiumFromMenu != 2) { // tireAndSpatiumFromMenu != 2
+		pBar && pBar.set(++myCurrActionNumber);
+		var myRealTire = properties.commonTireFromMenu == 0 ? "–" : "—";
+		
+		if (properties.tireAndSpatiumFromMenu == 1) {
+			myFindChangeScaleUsingGREP(
+				myText,
+				"([" + myLineOfSpaces + "])(" + myRealTire + ")([" + myLineOfSpaces + "])",
+				myAllSpacesValues[mySpaceListBeforeFromMenu] + myRealTire + myAllSpacesValues[mySpaceListAfterFromMenu],
+				myRealTire,
+				pBar,
+				" Обработка шпаций до и после тире",
+				properties
+			);
+		}
+	} // tireAndSpatiumFromMenu != 2
+	
+	if (properties.commatireFromMenu != 2) { // commatireFromMenu != 2
+		pBar && pBar.set(++myCurrActionNumber);
+		
+		if (properties.commatireFromMenu == 1) { // commatireFromMenu == 1
+			myFindChangeUsingGREP(
+				myText,
+				"(,|\\.|~e)([" + myLineOfSpaces + "]*)(—|–)",
+				"$1" + myAllSpacesValues[myCommaAndTireFromMenu] + myRealTire,
+				pBar,
+				" Шпация между запятой, точкой, многоточием и тире"
+			);  
+			
+			if (myAllSpacesValues[properties.myCommaAndTireFromMenu] == myNoSpace && properties.mySliderValueFromMenu < 100) { // == myNoSpace
+				// Если выполнилось масштабирование обрамляющих тире шпаций, то после удаления левой шпации, той, что идёт после тире/точки/многоточия, это масштабирование будет приложено к тире.
+				// Чтобы избавиться от этого, сделана последовательность действий, заключенная между { // == myNoSpace  и  } // == myNoSpace
+				//
+				app.findGrepPreferences = NothingEnum.nothing;
+				app.findGrepPreferences.findWhat = myRealTire;				
+				var myFoundSamples = myText.findGrep();
+				
+				if (myFoundSamples.length != 0) { // myFoundSamples.length != 0
+					
+					// цикл по числу элементов коллекции. Движение снизу вверх
+					for (var j = myFoundSamples.length - 1; j >= 0; j--) { // j >= 0; j--	
+						myLine = myFoundSamples[j] ;
+						
+						try { 
+							myLine.characters.item(0).horizontalScale = 100; 
+						} 
+						catch (e) {
+							continue; 
+						}     
+					} // j >= 0; j--
+				} // myFoundSamples.length != 0
+			} // == myNoSpace
+		} // commatireFromMenu == 1
+	} // commatireFromMenu != 2
+	if (properties.shortwordFromMenu != 2) { // shortwordFromMenu != 2
+		pBar && pBar.set(++myCurrActionNumber);
+		
+		if (properties.shortwordFromMenu == 1) {
+			myFindChangeUsingGREP(
+				myText,
+				"([\\n" + myLineOfSpaces + "\\(])(\\l\\.)([" + myLineOfSpaces + "]*)(\\l\\.)",
+				"$1" + "$2" + myAllSpacesValues[properties.myShortWordSpaceFromMenu] + "$4",
+				pBar,
+				" Шпация в сокращениях (т.к., т.п., т.д.)"
+			);
+		}
+	} // shortwordFromMenu != 2
+	if (properties.initialsFromMenu != 2) { // initialsFromMenu != 2
+		pBar && pBar.set(++myCurrActionNumber);
+		
+		if (properties.initialsFromMenu == 1) { // initialsFromMenu == 1   //   +?\\.{0,1}
+			myFindChangeUsingGREP(
+				myText,
+				"([\\r\\n" + myLineOfSpaces + "\\(])(\\u\\.|Дж\\.)([" + myLineOfSpaces + "]*)(\\u\\.|Дж\\.)([" + myLineOfSpaces + "]*)(\\u\\l+\\>)",
+				"$1" + "$2" + myAllSpacesValues[properties.myASPushkinFirstSpaceFromMenu] + "$4" + myAllSpacesValues[properties.myASPushkinSecondSpaceFromMenu] + "$6",
+				pBar,
+				" Шпации в инициалах"
+			); // (А. С. Пушкин   Дж. Дж. Томсон
+			//myFindChangeUsingGREP(myText,"([\\r\\n" + myLineOfSpaces + "\\(])(\\u\\.|Дж\\.)([" + myLineOfSpaces + "]*)(\\u\\.|Дж\\.)([" + myLineOfSpaces + "]*)(\\u\\l{3,4})","$1" + "$2" + myAllSpacesValues[myASPushkinFirstSpaceFromMenu] + "$4" + myAllSpacesValues[myASPushkinSecondSpaceFromMenu] + "$6",pBar," Шпации в инициалах"); // (А. С. Пушкин   Дж. Дж. Томсон
+			myFindChangeUsingGREP(myText,
+				"([\\r\\n" + myLineOfSpaces + "\\(])(\\u\\.|Дж\\.|св\\.|Св\\.)([" + myLineOfSpaces + "]*)(\\u\\l+\\>)",
+				"$1" + "$2"  + myAllSpacesValues[properties.myASPushkinSecondSpaceFromMenu] + "$4",
+				pBar,
+				" Шпации в инициалах"
+			); // (А. Пушкин   Дж. Томсон  св. Августин
+			myFindChangeUsingGREP(
+				myText,
+				"([\\r\\n" + myLineOfSpaces + "\\(])(\\u\\l+\\>)([" + myLineOfSpaces + "]*)(\\u)(\\.)([" + myLineOfSpaces + "]*)(\\u)(\\.)",
+				"$1" + "$2" + myAllSpacesValues[properties.myPushkinASFirstSpaceFromMenu] + "$4" + "$5" + myAllSpacesValues[properties.myPushkinASSecondSpaceFromMenu] + "$7" + "$8",
+				pBar,
+				" Шпации в инициалах"
+			);  // Пушкин А. С.  
+			myFindChangeUsingGREP(
+				myText,
+				"([\\r\\n" + myLineOfSpaces + "\\(])(\\u\\l+\\>)([" + myLineOfSpaces + "]*)(\\u)(\\.)",
+				"$1" + "$2" + myAllSpacesValues[properties.myPushkinASFirstSpaceFromMenu]  + "$4"+ "$5",
+				pBar,
+				" Шпации в инициалах"
+			); // Пушкин А.
+		} // initialsFromMenu == 1
+	} // initialsFromMenu != 2
+	//~ initialsFromMenu
+	if (properties.slitnoFromMenu != 2) { // slitnoFromMenu != 2
+		pBar && pBar.set(++myCurrActionNumber);
+		
+		if (properties.slitnoFromMenu == 0) {
+			myFindChangeUsingGREP(
+				myText,
+				"(\\d)(%|‰)",
+				"$1" + myThinSpace + "$2",
+				pBar,
+				" Обработка знаков процента и промилле"
+			);  
+		}
+	} // slitnoFromMenu != 2
+}

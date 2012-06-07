@@ -1,0 +1,44 @@
+﻿var mySpecialChar =    '([α-ωäöüÄÖÜß¼½¾])'; // греческие буквы от альфы до омеги и немецкие буквы α-ω,ä,ö,ü,Ä,Ö,Ü,ß,¼,½,¾ в гарнитуре Times New Roman, и знаки дробей
+var myMultipleReturn = "~b~b+";
+var mySingleReturn =   "\r";
+var myMultipleSpaces = "[~m~>~f~|~S~s~<~/~.~3~4~% ]{2,}";
+var myLineOfSpaces =   "~m~>~f~|~S~s~<~/~.~3~4~% ";
+var mySingleSpace =    " ";
+var myMultipleTabs =   "[\t]{2,}";
+///////////////////////////
+///////////////////////////////////
+// Индексы массива myAllSpaces
+// "Нет отбивки" =           0;
+// "Волосяная шпация" =      1;
+// "Обычный пробел" =        2;
+// "Фиксированный пробел" =  3;
+// "Неразрывный пробел" =    4;
+// "Шпация на 1/6 круглой" = 5;
+// "Тонкая шпация" =         6;
+// "Шпация на 1/4 круглой"   7;
+// "Шпация на 1/3 круглой" = 8;
+// "Шпация на точку" =       9;
+/////////////////////////////////
+var myDiscretionaryHyphen = "\u00AD";
+var myWinWordHyphen =       "\u00AC";
+var myNonbreakingHyphen =   "\u2011";
+var myWinWordHyphen =       "\u00AC";
+var myNonbreakingSpace =    "~S";
+var myNonbreakingSpaceFixedWidth = "~s";
+var myThinSpace =           "~<";
+var myHairSpace =           "~|";
+var myFigureSpace =         "~/";
+var myPunctuationSpace =    "~.";
+var myThirdSpace =          "~3";
+var myQuarterSpace =        "~4";
+var mySixSpace =            "~%";
+var mySpace =               " ";
+var myNoSpace =             "";
+var myEnSpace =             "\u2002";
+//////////////////////////////////
+// это минус, "забытый" разработчиками раскладки русских букв. Он будет заменен на короткое тире, имеющееся во всех русских гарнитурах
+var myApostrof =            "\u0027";
+var myChar0x2212 =          "\u2212"; 
+var myMinusChar  =          "–";
+
+var fontSymbol = app.fonts.item("Symbol");

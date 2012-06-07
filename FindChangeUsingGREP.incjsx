@@ -1,0 +1,59 @@
+﻿//////
+function myFindChangeUsingGREP (
+		myText,             // ссылка на объект Story, Paragraph, Text...
+		myFindPattern,      // маска для поиска
+		myChangePattern,    // маска для замены
+		myFunc,             // ссылка на объект ProgressBar
+		myCurrAction        // название операции отображаемое в прогрессбаре
+	) { // myFindChangeUsingGREP
+		
+	myFunc && myFunc.info(myCurrAction);
+	app.findGrepPreferences =                    NothingEnum.nothing;
+	app.changeGrepPreferences =                  NothingEnum.nothing;
+	app.findChangeGrepOptions.includeFootnotes = true;
+	app.findGrepPreferences.findWhat =           myFindPattern;
+	app.changeGrepPreferences.changeTo =         myChangePattern;
+	myText.changeGrep();
+} // myFindChangeUsingGREP 
+
+//////
+function myFindChangeScaleUsingGREP (myText, myFindPattern, mychangePattern, myRealTire, myFunc, myCurrAction, properties) { // myFindChangeScaleUsingGREP
+	myFunc && myFunc.info(myCurrAction);
+	//if (myCurrAction[0] != " ") myCurrActionNumber++; 
+	//myFunc.set(myCurrActionNumber);
+	// перед масштабированием восстановим масштаб в 100%
+	myText.characters.itemByRange(0, -1).horizontalScale = 100;
+	///
+	app.findGrepPreferences = NothingEnum.nothing;
+	app.changeGrepPreferences = NothingEnum.nothing;
+	app.findChangeGrepOptions.includeFootnotes = true;
+	app.findGrepPreferences.findWhat = myFindPattern;
+	app.changeGrepPreferences.changeTo = mychangePattern;
+	myText.changeGrep();
+	
+	if (properties.mySliderValueFromMenu < 100) { // mySliderValueFromMenu <100
+		// теперь ищем результаты замены 
+		app.findGrepPreferences.findWhat = myAllSpacesValues[properties.mySpaceListBeforeFromMenu] + 
+			myRealTire + myAllSpacesValues[properties.mySpaceListAfterFromMenu];
+		var myScaledSpaces = myText.findGrep();
+		
+		for (i = 0, l = myScaledSpaces.length; i < l; i++) { // myScaledSpaces.length
+			var myLine = myScaledSpaces[i]; // это объект String
+			
+			// чтобы адресоваться к конкретным символам строки, их надо определить, например, так:
+			try { 
+				myLine.characters.item(0).horizontalScale = properties.mySliderValueFromMenu; 
+			} catch (e) {
+				continue; 
+			} 
+			// если в качестве шпации выбрано "Нет отбивки", то масштабирование смысла не имеет. 
+			//Программма свалится. Чтобы исключить такое развитие событий, взяты интсрументы try / catch
+			
+			try { 
+				myLine.characters.item(2).horizontalScale = properties.mySliderValueFromMenu; 
+			} catch (e) {
+				continue; 
+			}
+		} // myScaledSpaces.length
+	} // mySliderValueFromMenu <100
+} // myFindChangeScaleUsingGREP 

@@ -1,0 +1,111 @@
+﻿#target indesign
+
+#include "Constants.incjsx"
+#include "FindChangeUsingGREP.incjsx
+#include "CleanText.incjsx"
+#include "TypographicaProcessing.incjsx"
+#include "PhoneValuesProcessing.incjsx"
+#include "SpatiumProcessing.incjsx"
+#include "RemoveHyperLinks.incjsx"
+
+// default values
+//var myNumberOfActions = 0;
+var myCurrActionNumber = 0;
+
+var properties = {
+	hyplinksFromMenu:             1,
+	myCleanValueFromMenu:         1,
+	myOneLineIsOneAbzatzFromMenu: 0,
+	repCharFromMenu:              1,
+	tabs2spacesFromMenu:          1,
+	hyphensFromMenu:              1,
+	commonTireFromMenu:           1,
+	minusFromMenu:                1,
+	digAndCharFromMenu:           1,
+	setquotes_valueFromMenu:      1,
+	mlnWithoutPointFromMenu:      1,
+	myTypographicaValueFromMenu:  1,
+	mySpatiumValueFromMenu:       1,
+	myPhoneValueFromMenu:         1,
+	grekCharStylesFromMenu:       1,
+	mySliderValueFromMenu:        100,
+	mySpaceListBeforeFromMenu:    0,
+	SepIsSpaceFromMenu:           1,
+	mySet34FromMenu:              1,
+	mySet322FromMenu:             1,
+	sixdigitsFromMenu:            1,
+	SearchedDefisFromMenu:        1,
+	charStylesFromMenu:           1
+	
+}
+/*
+var hyplinksFromMenu = 0;
+var myCleanValueFromMenu = 1;
+var myOneLineIsOneAbzatzFromMenu = 0;
+var repCharFromMenu = 0;
+var tabs2spacesFromMenu = 0;
+var hyphensFromMenu = 0;
+var commonTireFromMenu = 0;
+var minusFromMenu = 0;
+var digAndCharFromMenu = 0;
+var setquotes_valueFromMenu = 0;
+var mlnWithoutPointFromMenu = 0;
+var myTypographicaValueFromMenu = 0;
+var  mySpatiumValueFromMenu = 0;
+var myPhoneValueFromMenu = 0;
+*/
+
+//////////////////////////////////
+
+
+//var myText = app.selection[0].parentStory;
+
+myTxtProcessing(app.selection[0].parentStory, properties);
+
+
+//function myTxtProcessing (myProgramTitul, myHour, myMinutes, pBar) { // myTxtProcessing
+function myTxtProcessing (myText, properties, /* optional */ pBar) { // myTxtProcessing
+	//var pBar = new ProgressBar(myProgramTitul);
+	//pBar && pBar.reset(" Время начала обработки [ч:м] " + myHour + ":" + myMinutes, myNumberOfActions);
+	
+	if (properties.hyplinksFromMenu != 2) { // hyplinksFromMenu != 2
+		pBar && pBar.set(++myCurrActionNumber);
+		
+		if (properties.hyplinksFromMenu == 1)  { 
+			pBar && pBar.info(" Удаление гиперссылок"); 
+			RemoveHyperLinks(myText); 
+		}
+	} // hyplinksFromMenu != 2
+	myText.insertionPoints[0].contents = "\r";
+	myText.insertionPoints[-1].contents = "\r";
+	
+	// Чистка текста
+	if (properties.myCleanValueFromMenu == 1) { // myCleanValueFromMenu == 1
+		CleanText(myText, properties, pBar); // Чистка текста
+	} // myCleanValueFromMenu == 1
+	
+	// Оформление текста
+	if (properties.myTypographicaValueFromMenu == 1) { // myTypographicaValueFromMenu == 1
+		TypographicaProcessing(myText, properties, pBar); // Оформление текста
+	}  // myTypographicaValueFromMenu == 1
+	
+	// Шпации в тексте
+	if (properties.mySpatiumValueFromMenu == 1) { // mySpatiumValueFromMenu == 1
+		SpatiumProcessing(myText, properties, pBar);
+	} // mySpatiumValueFromMenu == 1
+	
+	// Номера телефонов
+	if (properties.myPhoneValueFromMenu == 1) { // myPhoneValueFromMenu == 1
+		PhoneValuesProcessing(myText, properties, pBar);
+	} // myPhoneValueFromMenu == 1
+	// все вкладки обработаны
+
+	// удаляем знаки перевода строки в начале и конце текста, оставшиеся после обработки
+	try { 
+		myText.characters[-1].remove(); 
+	} catch (e) {}
+
+	try { 
+		myText.characters[0].remove(); 
+	} catch (e) {}
+} // myTxtProcessing
